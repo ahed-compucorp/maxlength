@@ -172,23 +172,33 @@ function _maxlength_children(&$element, $ms_elements) {
 
   $children = element_get_visible_children($element);
   foreach ($children as $child) {
+    // Determine the element that will be passed to the maxlength_pre_render
+    // callback.
+    if (isset($element[$child][LANGUAGE_NONE][0]['value'])) {
+      // For textfield and textarea without text processing (Plain text).
+      $current_element = &$element[$child][LANGUAGE_NONE][0]['value'];
+    }
+    elseif (isset($element[$child][LANGUAGE_NONE][0])) {
+      // For textarea with text processing (filtered text).
+      $current_element = &$element[$child][LANGUAGE_NONE][0];
+    }
     // Check if the field settings for maxlength_js are set and add the maxlength and the label text.
-    if (isset($element[$child]['#field_name']) && isset($ms_elements[$element[$child]['#field_name']])) {
-      $settings = $ms_elements[$element[$child]['#field_name']]['widget']['settings'];
+    if (isset($current_element['#field_name']) && isset($ms_elements[$current_element['#field_name']])) {
+      $settings = $ms_elements[$current_element['#field_name']]['widget']['settings'];
       if ($settings['maxlength_js'] > 0) {
-        _maxlength_add_maxlength_attributes($element[$child], $settings);
+        _maxlength_add_maxlength_attributes($current_element, $settings);
 
         if (isset($settings['maxlength_js_enforce']) && $settings['maxlength_js_enforce']) {
-          $element[$child]['#maxlength_js_enforce'] = TRUE;
+          $current_element['#maxlength_js_enforce'] = TRUE;
         }
         if (isset($settings['maxlength_js_truncate_html']) && $settings['maxlength_js_truncate_html']) {
-          $element[$child]['#maxlength_js_truncate_html'] = TRUE;
+          $current_element['#maxlength_js_truncate_html'] = TRUE;
         }
       }
 
-      if (isset($element[$child]['summary']) && isset($settings['maxlength_js_summary'])
+      if (isset($current_element['summary']) && isset($settings['maxlength_js_summary'])
         && $settings['maxlength_js_summary'] > 0) {
-        _maxlength_add_maxlength_attributes($element[$child]['summary'], $settings, '_summary');
+        _maxlength_add_maxlength_attributes($current_element['summary'], $settings, '_summary');
       }
     }
     _maxlength_children($element[$child], $ms_elements);
